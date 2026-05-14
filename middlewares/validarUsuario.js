@@ -28,7 +28,7 @@ module.exports = (req, res, next) => {
     aqui nessa api vamos criar uma regra de texto par que fique no formato
     (ddd) 00000-0000 ou (ddd) 0000-0000*/
  
-    const regexTelefone = /^\(\d{2})\s\d{4,5}-\d{4}$/
+    const regexTelefone = /^\(\d{2}\)\s\d{4,5}-\d{4}$/
     /* sumário do regex
         / = inicio da regra
         ^ = início da string (o telefone deve começar exatamente assim)

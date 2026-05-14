@@ -54,11 +54,68 @@ app.post("/usuarios", middlawareValidador, async(req, res) => {
 
 
 //login
-app.post("/login", async(req, res) => {
-    
+app.post("/login", async(req, res) => {  
     const { email, senha} = req.body
 
     const usuario = usuarios.find(u => u.email === email )
+
+    //verificar se o email nao foi encontrado
+    if (!usuario) {
+        return respostaErro(res, "Usuário não encontrado", 404)
+    }
+
+    //verificar se a senha é valida
+    const senhaValida = await bcrypt.compare(senha, usuario.senha)
+    if (!senhaValida){
+        return respostaErro(res, "Senha incorreta", 401)
+    }
+
+    //gerar o token JWT 
+    const token = jwt.sign(
+        {
+            id: usuario.id,
+            email: usuario.email
+        },
+        SECRET,
+        {
+            expiresIn: '1h'
+        }
+    )
+
+    return respostaSucesso(res, {token})
+
+})
+
+
+//listar os usuarios - rota protegida pela autenticação
+app.get("/usuarios", auth, (req, res) => {
+    const lista = usuarios.map(usuario => ({
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        telefone: usuario.telefone,
+        idade:  usuario.idade
+    }))
+    return respostaSucesso(res, lista)
+})
+
+app.get("/usuarios/:id", auth, (req, res) => {
+    const id = Number(req.params.id)
+
+    const usuario = usuarios.find(u => u.id === id)
+
+    //verificar se o id existe
+    if(!usuario){
+        return respostaErro( res, "Usuário nao encontrado", 404)
+    }
+    const usuarioSemSenha = {
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        telefone: usuario.telefone,
+        idade:  usuario.idade
+    }
+    return respostaSucesso(res, usuarioSemSenha)
 })
 
 
